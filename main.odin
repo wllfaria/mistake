@@ -1,16 +1,11 @@
 package main
 
 import "core:fmt"
-import "term"
+import "editor"
 
 main :: proc() {
-	term.enable_raw_mode()
-	for {
-		event := term.read()
-		char := event.(term.KeyEvent).code.(term.Char).value
-		if char == 'q' {
-			break
-		}
-	}
-	term.disable_raw_mode()
+	editor.setup_terminal()
+	defer editor.reset_terminal()
+
+	editor.run()
 }

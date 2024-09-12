@@ -275,7 +275,7 @@ parse_base :: proc(
 		if byte >= 0x01 && byte <= 0x1A {
 			// byte is between 1 and 26, which means is ctrl + a-z
 			code = Char {
-				value = cast(rune)(byte - 1 + 'A'),
+				value = cast(rune)(byte - 1 + 'a'),
 			}
 			modifier = .Control
 		} else if byte >= 0x1C && byte <= 0x1F {
@@ -368,19 +368,19 @@ parsing_normal :: proc(t: ^testing.T) {
 
 	// every other CTRL + a-z
 	for idx in 0 ..< 9 {
-		append(&codes, Char{value = cast(rune)(idx + 65)})
+		append(&codes, Char{value = cast(rune)(idx + 'a')})
 		append(&modifiers, KeyModifier.Control)
 		append(&bytes, cast(u8)(idx + 1))
 	}
 
 	for idx in 10 ..< 12 {
-		append(&codes, Char{value = cast(rune)(idx + 65)})
+		append(&codes, Char{value = cast(rune)(idx + 'a')})
 		append(&modifiers, KeyModifier.Control)
 		append(&bytes, cast(u8)(idx + 1))
 	}
 
 	for idx in 14 ..< 26 {
-		append(&codes, Char{value = cast(rune)(idx + 65)})
+		append(&codes, Char{value = cast(rune)(idx + 'a')})
 		append(&modifiers, KeyModifier.Control)
 		append(&bytes, cast(u8)(idx + 1))
 	}
