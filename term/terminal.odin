@@ -3,7 +3,12 @@ package term
 import "./escape"
 import "core:encoding/ansi"
 import "core:fmt"
+import "core:os"
 import "core:strings"
+
+print :: proc(r: rune) {
+	os.write_rune(os.stdout, r)
+}
 
 ClearType :: enum {
 	All,

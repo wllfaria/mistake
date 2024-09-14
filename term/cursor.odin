@@ -50,36 +50,51 @@ move_to :: proc(#any_int col: int, #any_int row: int) {
 	execute(MoveTo{col, row})
 }
 
+show_cursor :: proc() {
+	execute(.Show)
+}
+
+hide_cursor :: proc() {
+	execute(.Hide)
+}
+
 execute :: proc(command: CursorCommand) {
+	buf := strings.builder_make()
 	switch c in command {
 	case MoveTo:
-		buf := strings.builder_make()
-		fmt.sbprintf(&buf, "%d;%d%s", c.x + 1, c.y + 1, ansi.CUP)
-		e.escape(strings.to_string(buf))
+		fmt.sbprintf(&buf, "%d;%d%s", c.y + 1, c.x + 1, ansi.CUP)
+		str := strings.to_string(buf)
+		defer delete(str)
+		e.escape(str)
 	case ToCol:
-		buf := strings.builder_make()
 		fmt.sbprintf(&buf, "%d" + ansi.CHA, c)
-		e.escape(strings.to_string(buf))
+		str := strings.to_string(buf)
+		defer delete(str)
+		e.escape(str)
 	case ToRow:
-		buf := strings.builder_make()
 		fmt.sbprintf(&buf, "%dd", c)
-		e.escape(strings.to_string(buf))
+		str := strings.to_string(buf)
+		defer delete(str)
+		e.escape(str)
 	case Left:
-		buf := strings.builder_make()
 		fmt.sbprintf(&buf, "%d" + ansi.CUB, c)
-		e.escape(strings.to_string(buf))
+		str := strings.to_string(buf)
+		defer delete(str)
+		e.escape(str)
 	case Down:
-		buf := strings.builder_make()
 		fmt.sbprintf(&buf, "%d" + ansi.CUD, c)
-		e.escape(strings.to_string(buf))
+		str := strings.to_string(buf)
+		defer delete(str)
+		e.escape(str)
 	case Up:
-		buf := strings.builder_make()
 		fmt.sbprintf(&buf, "%d" + ansi.CUU, c)
-		e.escape(strings.to_string(buf))
+		str := strings.to_string(buf)
+		e.escape(str)
 	case Right:
-		buf := strings.builder_make()
 		fmt.sbprintf(&buf, "%d" + ansi.CUF, c)
-		e.escape(strings.to_string(buf))
+		str := strings.to_string(buf)
+		defer delete(str)
+		e.escape(str)
 	case CursorStyle:
 		switch c {
 		case .Default:

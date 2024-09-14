@@ -2,12 +2,14 @@ package main
 
 import "core:flags"
 import "core:fmt"
+import "core:log"
 import "core:mem"
 import "core:os"
 import "editor"
 
 Options :: struct {
-	file: string `args:"pos=0", usage:"something"`,
+	file:     string `args:"pos=0", usage:"something"`,
+	log_file: os.Handle `args:"file=cwt,perms=0644,name=log_file"`,
 }
 
 parse_args :: proc(args: []string) -> Options {
@@ -17,6 +19,7 @@ parse_args :: proc(args: []string) -> Options {
 }
 
 main :: proc() {
+
 	when ODIN_DEBUG {
 		track: mem.Tracking_Allocator
 		mem.tracking_allocator_init(&track, context.allocator)
@@ -42,6 +45,8 @@ main :: proc() {
 	defer editor.reset_terminal()
 
 	options := parse_args(os.args[1:])
+	context.logger = log.create_file_logger(options.log_file, log.Level.Info)
+
 	editor.with_file(options.file)
 	defer editor.drop()
 

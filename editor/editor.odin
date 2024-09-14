@@ -4,9 +4,12 @@ import "../slab"
 import "../term"
 import "buffer"
 import "core:fmt"
+import "core:log"
 import "fs"
 import "pane"
 import "store"
+import "tab"
+import "ui"
 import "viewport"
 
 setup_terminal :: proc() {
@@ -40,21 +43,21 @@ with_file :: proc(filename: string) {
 			buf_id := store.add_buffer(&editor.store, buf)
 			p := pane.with_buffer(buf_id)
 			pane_id := store.add_pane(&editor.store, p)
+			tab := tab.new(pane_id)
+			store.add_tab(&editor.store, tab)
 		} else {
 			file_info = fs.with_new_file(filename)
 			buf := buffer.new_from_file(file_info)
 			buf_id := store.add_buffer(&editor.store, buf)
 			p := pane.with_buffer(buf_id)
 			pane_id := store.add_pane(&editor.store, p)
+			tab := tab.new(pane_id)
+			store.add_tab(&editor.store, tab)
 		}
 	}
 
 	term_size := term.size()
 	editor.viewport = viewport.new(term_size.width, term_size.height)
-}
-
-drop :: proc() {
-	store.drop(editor.store)
 }
 
 handle_key_event :: proc(event: term.KeyEvent) -> Maybe(Action) {
@@ -82,12 +85,19 @@ next_event :: proc() -> Maybe(Action) {
 	return nil
 }
 
-
 run :: proc() {
 	for {
+		term.hide_cursor()
+		ui.render_tab(&editor.store, &editor.viewport)
+		ui.flush(&editor.viewport)
+		term.show_cursor()
 		action := next_event()
 		if action == .Quit {
 			break
 		}
 	}
+}
+
+drop :: proc() {
+	store.drop(editor.store)
 }

@@ -3,3 +3,5 @@
 odintor
 build/
 odintor.dSYM/**
+.vscode
+*.log

@@ -71,6 +71,17 @@ remove :: proc(slab: ^Slab($T), idx: Key) -> T {
 	return entry.(Full(T)).inner
 }
 
+get :: proc(slab: ^Slab($T), idx: Key) -> T {
+	entry := slab.inner[idx]
+	switch e in entry {
+	case Full(T):
+		return e.inner
+	case Empty:
+		panic("tried to get empty slab item")
+	}
+	panic("unreachable")
+}
+
 drop :: proc(slab: Slab($T)) {
 	delete(slab.inner)
 }

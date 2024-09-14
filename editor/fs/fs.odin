@@ -35,7 +35,6 @@ read_file :: proc(filename: string) -> Maybe(FileInfo) {
 		return nil
 	}
 	absolute := absolutize(clean_filename)
-	defer delete(absolute)
 	basename := filepath.base(absolute)
 	is_dir := os.is_dir(absolute)
 	ext := filepath.ext(absolute)
@@ -59,10 +58,11 @@ exists :: proc(path: string) -> bool {
 
 absolutize :: proc(path: string) -> string {
 	cwd := os.get_current_directory()
+	defer delete(cwd)
 	buf := strings.builder_make()
 	fmt.sbprintf(&buf, "%s/%s", cwd, path)
 	formatted := strings.to_string(buf)
-	defer delete(formatted)
+	defer strings.builder_destroy(&buf)
 
 	clean := filepath.clean(formatted)
 	return clean
