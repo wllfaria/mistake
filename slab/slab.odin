@@ -50,6 +50,10 @@ push :: proc(slab: ^Slab($T), value: T) -> Key {
 	panic("unreachable")
 }
 
+count :: proc(slab: ^Slab($T)) -> int {
+	return len(slab.inner)
+}
+
 
 remove :: proc(slab: ^Slab($T), idx: Key) -> T {
 	new_entry := Empty {

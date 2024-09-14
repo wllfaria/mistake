@@ -1,3 +1,4 @@
+#include <sys/ioctl.h>
 #include <termios.h>
 #include <unistd.h>
 
@@ -18,4 +19,16 @@ void ffi_enable_raw_mode() {
   raw.c_cc[VTIME] = 0;
 
   tcsetattr(STDIN_FILENO, TCSANOW, &raw);
+}
+
+typedef struct FFITermSize {
+  int width;
+  int height;
+} FFITermSize;
+
+FFITermSize ffi_size() {
+  struct winsize ws;
+  ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+  FFITermSize size = {.width = ws.ws_col, .height = ws.ws_row};
+  return size;
 }

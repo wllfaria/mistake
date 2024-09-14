@@ -1,7 +1,13 @@
 package editor
 
+import "../slab"
 import "../term"
+import "buffer"
 import "core:fmt"
+import "fs"
+import "pane"
+import "store"
+import "viewport"
 
 setup_terminal :: proc() {
 	term.enter_alternate_screen()
@@ -17,10 +23,43 @@ Action :: enum {
 	Quit,
 }
 
+Editor :: struct {
+	store:    store.Store,
+	viewport: viewport.Viewport,
+}
+
+@(private = "file")
+editor: Editor
+
+with_file :: proc(filename: string) {
+	file_info: fs.FileInfo
+	if filename != "" {
+		if data := fs.read_file(filename); data != nil {
+			file_info = data.(fs.FileInfo)
+			buf := buffer.new_from_file(file_info)
+			buf_id := store.add_buffer(&editor.store, buf)
+			p := pane.with_buffer(buf_id)
+			pane_id := store.add_pane(&editor.store, p)
+		} else {
+			file_info = fs.with_new_file(filename)
+			buf := buffer.new_from_file(file_info)
+			buf_id := store.add_buffer(&editor.store, buf)
+			p := pane.with_buffer(buf_id)
+			pane_id := store.add_pane(&editor.store, p)
+		}
+	}
+
+	term_size := term.size()
+	editor.viewport = viewport.new(term_size.width, term_size.height)
+}
+
+drop :: proc() {
+	store.drop(editor.store)
+}
+
 handle_key_event :: proc(event: term.KeyEvent) -> Maybe(Action) {
 	switch c in event.code {
 	case term.Char:
-		fmt.println(event)
 		if c.value == 'q' && event.modifier == .Control {
 			return .Quit
 		}
@@ -42,6 +81,7 @@ next_event :: proc() -> Maybe(Action) {
 
 	return nil
 }
+
 
 run :: proc() {
 	for {

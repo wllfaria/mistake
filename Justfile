@@ -11,4 +11,3 @@ configure:
         ar rc term/ffi/term.a term/ffi/term.o
         rm term/ffi/term.o
     fi
-

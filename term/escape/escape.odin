@@ -1,4 +1,4 @@
-package term
+package escape
 
 import "core:encoding/ansi"
 import "core:fmt"
@@ -9,6 +9,7 @@ escape :: proc(value: string) {
 	buf := strings.builder_make()
 	fmt.sbprintf(&buf, "%s%s", ansi.CSI, value)
 	str := strings.to_string(buf)
+	defer delete(str)
 	os.write_string(os.stdout, str)
 }
 
