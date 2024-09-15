@@ -19,6 +19,9 @@ parse_args :: proc(args: []string) -> Options {
 }
 
 main :: proc() {
+	options := parse_args(os.args[1:])
+	context.logger = log.create_file_logger(options.log_file, log.Level.Info)
+	defer log.destroy_file_logger(context.logger)
 
 	when ODIN_DEBUG {
 		track: mem.Tracking_Allocator
@@ -38,14 +41,12 @@ main :: proc() {
 					fmt.eprintf("- %p @ %v\n", entry.memory, entry.location)
 				}
 			}
+			mem.tracking_allocator_destroy(&track)
 		}
 	}
 
 	editor.setup_terminal()
 	defer editor.reset_terminal()
-
-	options := parse_args(os.args[1:])
-	context.logger = log.create_file_logger(options.log_file, log.Level.Info)
 
 	editor.with_file(options.file)
 	defer editor.drop()

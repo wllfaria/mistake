@@ -7,10 +7,11 @@ import "../pane"
 import "../tab"
 
 Store :: struct {
-	panes:      slab.Slab(pane.Pane),
-	buffers:    slab.Slab(buffer.Buffer),
-	tabs:       slab.Slab(tab.Tab),
-	active_tab: slab.Key,
+	panes:       slab.Slab(pane.Pane),
+	buffers:     slab.Slab(buffer.Buffer),
+	tabs:        slab.Slab(tab.Tab),
+	active_tab:  slab.Key,
+	active_pane: slab.Key,
 }
 
 empty :: proc() -> Store {
@@ -48,4 +49,8 @@ add_tab :: proc(store: ^Store, t: tab.Tab) -> slab.Key {
 
 active_tab :: proc(store: ^Store) -> tab.Tab {
 	return slab.get(&store.tabs, store.active_tab)
+}
+
+active_pane :: proc(store: ^Store) -> pane.Pane {
+	return slab.get(&store.panes, store.active_pane)
 }

@@ -2,10 +2,13 @@ package editor
 
 import "../slab"
 import "../term"
+import "action"
 import "buffer"
 import "core:fmt"
 import "core:log"
+import "event"
 import "fs"
+import "keymap"
 import "pane"
 import "store"
 import "tab"
@@ -56,43 +59,34 @@ with_file :: proc(filename: string) {
 		}
 	}
 
+	keymap.setup()
 	term_size := term.size()
 	editor.viewport = viewport.new(term_size.width, term_size.height)
 }
 
-handle_key_event :: proc(event: term.KeyEvent) -> Maybe(Action) {
-	switch c in event.code {
-	case term.Char:
-		if c.value == 'q' && event.modifier == .Control {
-			return .Quit
-		}
-	case term.BaseKey:
-	case term.F:
+handle_editor_action :: proc(action: Maybe(action.EditorAction)) -> bool {
+	switch action {
+	case .Quit:
+		return true
 	}
 
-	return nil
-}
-
-next_event :: proc() -> Maybe(Action) {
-	event := term.read()
-	switch ev in event {
-	case term.KeyEvent:
-		return handle_key_event(ev)
-	case term.Focus:
-	case term.Resize:
-	}
-
-	return nil
+	return false
 }
 
 run :: proc() {
 	for {
 		term.hide_cursor()
+
 		ui.render_tab(&editor.store, &editor.viewport)
 		ui.flush(&editor.viewport)
+
+		curr_pane := store.active_pane(&editor.store)
+
+		ui.render_cursor(&curr_pane)
 		term.show_cursor()
-		action := next_event()
-		if action == .Quit {
+
+		editor_action := event.next(&editor.store)
+		if should_quit := handle_editor_action(editor_action); should_quit {
 			break
 		}
 	}
@@ -100,4 +94,5 @@ run :: proc() {
 
 drop :: proc() {
 	store.drop(editor.store)
+	keymap.drop()
 }

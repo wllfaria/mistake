@@ -15,8 +15,7 @@ render_pane :: proc(st: ^store.Store, pane: ^p.Pane, pos: geometry.Pos, vp: ^vie
 }
 
 render_tab :: proc(st: ^store.Store, vp: ^viewport.Viewport) {
-	t := store.active_tab(st)
-	layout := t.layout
+	layout := store.active_tab(st).layout
 	switch n in layout {
 	case tab.Leaf:
 		pane := slab.get(&st.panes, n)
@@ -34,4 +33,8 @@ flush :: proc(vp: ^viewport.Viewport) {
 		term.move_to(col, row)
 		term.print(cell.value)
 	}
+}
+
+render_cursor :: proc(pane: ^p.Pane) {
+	term.move_to(pane.cursor.x, pane.cursor.y)
 }
